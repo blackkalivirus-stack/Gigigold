@@ -1,0 +1,7 @@
+{
+  "name": "Aura DigiGold",
+  "description": "A premium, compliant, and secure digital gold investment platform for the Indian market.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

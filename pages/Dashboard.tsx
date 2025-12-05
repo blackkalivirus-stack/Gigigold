@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
+import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Bell, TrendingUp, TrendingDown, ChevronRight, ShieldCheck, Gift, Wallet, Repeat, CreditCard, Lock, User as UserIcon } from '../components/ui/Icons';
 import { Button } from '../components/ui/Button';
-import { MOCK_RATES, CHART_DATA } from '../constants';
+import { MOCK_RATES, HISTORICAL_DATA } from '../constants';
 import { TransactionType } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabaseClient';
@@ -15,6 +15,9 @@ export const Dashboard: React.FC = () => {
   const [profileImg, setProfileImg] = useState('https://picsum.photos/200');
   const [isMounted, setIsMounted] = useState(false);
   const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
+  
+  // Chart State
+  const [timeRange, setTimeRange] = useState<'1D' | '1W' | '1M' | '1Y'>('1D');
 
   useEffect(() => {
     setIsMounted(true);
@@ -60,6 +63,8 @@ export const Dashboard: React.FC = () => {
       navigate(path);
     }
   };
+
+  const chartData = HISTORICAL_DATA[timeRange];
 
   return (
     <div className="space-y-6 animate-fade-in pt-safe bg-transparent min-h-full">
@@ -216,14 +221,26 @@ export const Dashboard: React.FC = () => {
         </div>
 
         {/* Chart */}
-        <div className="h-48 w-full bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden relative isolate">
-           <div className="absolute top-4 left-4 z-20">
-              <span className="text-[10px] text-slate-500 font-medium bg-slate-100 px-2 py-1 rounded-md border border-slate-200">Gold Trend (24h)</span>
+        <div className="h-64 w-full bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden relative isolate flex flex-col">
+           <div className="flex items-center justify-between p-4 border-b border-slate-50">
+              <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Price Trend</span>
+              <div className="flex bg-slate-100 p-0.5 rounded-lg">
+                {(['1D', '1W', '1M', '1Y'] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTimeRange(t)}
+                    className={`px-3 py-1 rounded-md text-[10px] font-bold transition-all ${timeRange === t ? 'bg-white text-gold-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
            </div>
-           <div className="absolute inset-0 w-full h-full pt-8">
+           
+           <div className="flex-1 w-full relative">
              {isMounted ? (
                <ResponsiveContainer width="100%" height="100%">
-                 <AreaChart data={CHART_DATA}>
+                 <AreaChart data={chartData} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                    <defs>
                      <linearGradient id="colorGold" x1="0" y1="0" x2="0" y2="1">
                        <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.2}/>
@@ -235,7 +252,15 @@ export const Dashboard: React.FC = () => {
                      itemStyle={{ color: '#d97706' }}
                      cursor={{ stroke: '#cbd5e1', strokeWidth: 1 }}
                    />
-                   <Area type="monotone" dataKey="value" stroke="#f59e0b" strokeWidth={2} fillOpacity={1} fill="url(#colorGold)" />
+                   <Area 
+                    type="monotone" 
+                    dataKey="value" 
+                    stroke="#f59e0b" 
+                    strokeWidth={2} 
+                    fillOpacity={1} 
+                    fill="url(#colorGold)" 
+                    animationDuration={1000}
+                   />
                  </AreaChart>
                </ResponsiveContainer>
              ) : (

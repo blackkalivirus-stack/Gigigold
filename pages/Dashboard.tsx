@@ -62,7 +62,7 @@ export const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in pt-safe bg-slate-100/50 min-h-full">
+    <div className="space-y-6 animate-fade-in pt-safe bg-transparent min-h-full">
       {/* Header */}
       <header className="px-6 pt-6 pb-2 flex justify-between items-center">
         <div className="flex items-center gap-3">
@@ -93,7 +93,7 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
         <button 
-          onClick={() => handleActionClick('/notifications')}
+          onClick={() => navigate('/notifications')}
           className="p-2.5 rounded-full bg-white border border-slate-200 text-slate-600 hover:text-gold-600 hover:border-gold-200 transition-colors active:scale-95 shadow-sm"
         >
           <Bell size={20} />
@@ -265,11 +265,12 @@ export const Dashboard: React.FC = () => {
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-sm border border-slate-100 ${
                         txn.type === TransactionType.BUY ? 'bg-green-50 text-green-600' : 
                         txn.type === TransactionType.SELL ? 'bg-red-50 text-red-600' : 
+                        txn.type === 'GIFT' ? 'bg-purple-50 text-purple-600' :
                         'bg-blue-50 text-blue-600'
                       }`}>
                         {txn.type === TransactionType.BUY ? <TrendingUp size={18} /> : 
                         txn.type === TransactionType.SELL ? <TrendingDown size={18} /> : 
-                        <CreditCard size={18} />}
+                        txn.type === 'GIFT' ? <Gift size={18} /> : <CreditCard size={18} />}
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-slate-900 capitalize">

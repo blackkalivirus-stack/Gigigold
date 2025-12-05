@@ -12,6 +12,8 @@ import { Signup } from './pages/Signup';
 import { Terms } from './pages/Terms';
 import { GiftGold } from './pages/GiftGold';
 import { SIP } from './pages/SIP';
+import { Redeem } from './pages/Redeem';
+import { Notifications } from './pages/Notifications';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Loader2 } from './components/ui/Icons';
 
@@ -52,7 +54,10 @@ const AppRoutes: React.FC = () => {
           <Route path="/sell" element={<ProtectedRoute><SellGold /></ProtectedRoute>} />
           <Route path="/gift" element={<ProtectedRoute><GiftGold /></ProtectedRoute>} />
           <Route path="/sip" element={<ProtectedRoute><SIP /></ProtectedRoute>} />
-          <Route path="/redeem" element={<ProtectedRoute><SellGold /></ProtectedRoute>} />
+          
+          <Route path="/redeem" element={<ProtectedRoute><Redeem /></ProtectedRoute>} />
+          <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+
           <Route path="/kyc-flow" element={<ProtectedRoute><KYC /></ProtectedRoute>} />
           <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

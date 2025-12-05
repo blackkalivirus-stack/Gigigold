@@ -1,4 +1,3 @@
-
 // Simulation of Indian Fintech Sandbox APIs (Zoop, Digio, etc.)
 
 export interface SandboxResponse<T> {

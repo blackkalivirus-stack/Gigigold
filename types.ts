@@ -13,6 +13,7 @@ export interface User {
   kycStatus: KycStatus;
   goldBalanceGrams: number;
   walletBalanceInr: number;
+  email?: string;
 }
 
 export enum TransactionType {

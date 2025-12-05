@@ -21,10 +21,10 @@ export const Button: React.FC<ButtonProps> = ({
   const baseStyles = "relative inline-flex items-center justify-center font-semibold transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]";
   
   const variants = {
-    primary: "bg-gradient-to-r from-gold-400 to-gold-600 text-white shadow-lg shadow-gold-900/20 hover:shadow-gold-900/40 border border-transparent",
-    secondary: "bg-slate-800 text-white hover:bg-slate-700 border border-slate-700",
-    outline: "bg-transparent text-slate-300 border border-slate-600 hover:border-slate-400 hover:text-white",
-    danger: "bg-red-500/10 text-red-500 border border-red-500/50 hover:bg-red-500/20"
+    primary: "bg-gradient-to-r from-gold-500 to-gold-600 text-white shadow-lg shadow-gold-500/30 hover:shadow-gold-500/40 border border-transparent",
+    secondary: "bg-slate-100 text-slate-900 hover:bg-slate-200 border border-slate-200",
+    outline: "bg-transparent text-slate-600 border border-slate-300 hover:border-slate-500 hover:text-slate-900",
+    danger: "bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
   };
 
   const sizes = {

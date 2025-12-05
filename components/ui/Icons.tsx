@@ -33,7 +33,14 @@ import {
   Eye,
   EyeOff,
   Info,
-  X
+  X,
+  CloudLightning,
+  Fingerprint,
+  ScanFace,
+  Heart,
+  CalendarClock,
+  PauseCircle,
+  PlayCircle
 } from 'lucide-react';
 
 export {
@@ -71,5 +78,12 @@ export {
   Eye,
   EyeOff,
   Info,
-  X
+  X,
+  CloudLightning,
+  Fingerprint,
+  ScanFace,
+  Heart,
+  CalendarClock,
+  PauseCircle,
+  PlayCircle
 };

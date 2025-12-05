@@ -22,18 +22,18 @@ export const Header: React.FC<HeaderProps> = ({ title, showBack = false, onBack,
   };
 
   return (
-    <header className={`sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-navy-950/90 backdrop-blur-xl border-b border-white/5 ${className}`}>
+    <header className={`sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-white/90 backdrop-blur-xl border-b border-slate-100 shadow-sm ${className}`}>
       <div className="flex items-center gap-4">
         {showBack && (
           <button 
             onClick={handleBack}
-            className="group p-2 -ml-2 rounded-full text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all active:scale-90"
+            className="group p-2 -ml-2 rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-all active:scale-90"
             aria-label="Go back"
           >
             <ArrowLeft size={22} className="group-hover:-translate-x-0.5 transition-transform" />
           </button>
         )}
-        <h1 className="text-lg font-bold text-white tracking-tight leading-none">{title}</h1>
+        <h1 className="text-lg font-bold text-slate-900 tracking-tight leading-none">{title}</h1>
       </div>
       {rightAction && (
         <div className="flex items-center">

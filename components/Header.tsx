@@ -22,15 +22,15 @@ export const Header: React.FC<HeaderProps> = ({ title, showBack = false, onBack,
   };
 
   return (
-    <header className={`sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-white/90 backdrop-blur-xl border-b border-slate-100 shadow-sm ${className}`}>
+    <header className={`sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-slate-50/80 backdrop-blur-xl border-b border-white/50 transition-all duration-300 ${className}`}>
       <div className="flex items-center gap-4">
         {showBack && (
           <button 
             onClick={handleBack}
-            className="group p-2 -ml-2 rounded-full text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-all active:scale-90"
+            className="group p-2 -ml-2 rounded-full bg-white text-slate-600 border border-slate-100 shadow-sm hover:shadow-md hover:text-slate-900 transition-all active:scale-90"
             aria-label="Go back"
           >
-            <ArrowLeft size={22} className="group-hover:-translate-x-0.5 transition-transform" />
+            <ArrowLeft size={20} className="group-hover:-translate-x-0.5 transition-transform" />
           </button>
         )}
         <h1 className="text-lg font-bold text-slate-900 tracking-tight leading-none">{title}</h1>

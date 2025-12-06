@@ -24,7 +24,7 @@ export const Notifications: React.FC = () => {
     },
     {
       id: 3,
-      title: "Welcome to Aura",
+      title: "Welcome to PMJ Jewels",
       message: "Thanks for joining! Complete your KYC to unlock higher limits.",
       time: "2 days ago",
       type: "INFO",

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { User } from '../types';
@@ -96,9 +97,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (error: any) {
       setLoading(false);
-      console.error("Login logic error:", error);
-      
+      // Convert error to string immediately
       const errMsg = getErrorMessage(error);
+      console.error("Login logic error:", errMsg); // Removed the raw error object from log if it causes issues, but errMsg is safe string now
+      
       return { success: false, isNewUser: false, error: errMsg };
     }
   };

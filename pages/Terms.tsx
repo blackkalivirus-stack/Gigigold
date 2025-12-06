@@ -30,7 +30,7 @@ export const Terms: React.FC = () => {
            {activeTab === 'TERMS' ? (
              <>
                <h3 className="font-bold text-slate-900">1. Introduction</h3>
-               <p>Welcome to Aura DigiGold. By using our application, you agree to these terms.</p>
+               <p>Welcome to PMJ Jewels - DigiGold. By using our application, you agree to these terms.</p>
                
                <h3 className="font-bold text-slate-900">2. Gold Purchase & Storage</h3>
                <p>Digital Gold purchased is 24K (99.5% purity). It is stored in secured vaults managed by our partner. The buy/sell price is market-linked and includes GST where applicable.</p>

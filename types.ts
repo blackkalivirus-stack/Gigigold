@@ -1,3 +1,4 @@
+
 export enum KycStatus {
   NOT_STARTED = 'NOT_STARTED',
   PENDING = 'PENDING',
@@ -20,7 +21,8 @@ export enum TransactionType {
   BUY = 'BUY',
   SELL = 'SELL',
   GIFT = 'GIFT',
-  REDEEM = 'REDEEM'
+  REDEEM = 'REDEEM',
+  SIP = 'SIP'
 }
 
 export enum TransactionStatus {

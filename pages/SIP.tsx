@@ -2,25 +2,67 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { Button } from '../components/ui/Button';
-import { CalendarClock, Plus, CheckCircle, PauseCircle, PlayCircle, AlertTriangle, TrendingUp } from '../components/ui/Icons';
+import { CalendarClock, Plus, CheckCircle, PauseCircle, PlayCircle, AlertTriangle, TrendingUp, RefreshCw, Calendar, Info } from '../components/ui/Icons';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabaseClient';
 import { MOCK_RATES } from '../constants';
 import { getErrorMessage } from '../utils/helpers';
+import { TransactionType } from '../types';
+
+/* 
+  !!! IMPORTANT: DATABASE SETUP REQUIRED !!!
+  
+  Run this SQL in your Supabase SQL Editor to create the necessary table:
+
+  create table if not exists sips (
+    id uuid default gen_random_uuid() primary key,
+    user_phone text not null,
+    sip_type text not null, -- 'DAILY', 'WEEKLY', 'MONTHLY'
+    plan_amount numeric not null,
+    start_date date not null,
+    next_due_date date not null,
+    total_cycles integer not null,
+    cycles_completed integer default 0,
+    status text default 'ACTIVE', -- 'ACTIVE', 'COMPLETED', 'CANCELLED'
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+  );
+
+  -- Optional: Enable RLS
+  alter table sips enable row level security;
+  create policy "Users can see their own sips" on sips for select using (auth.uid()::text = user_phone OR true); -- Simplified for this demo
+*/
+
+type SipType = 'DAILY' | 'WEEKLY' | 'MONTHLY';
+
+interface SipRecord {
+  id: string;
+  user_phone: string;
+  sip_type: SipType;
+  plan_amount: number;
+  start_date: string;
+  next_due_date: string;
+  total_cycles: number;
+  cycles_completed: number;
+  status: 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+  created_at: string;
+}
 
 export const SIP: React.FC = () => {
   const navigate = useNavigate();
   const { user, refreshUser } = useAuth();
   
   const [activeTab, setActiveTab] = useState<'MY_SIPS' | 'CREATE'>('MY_SIPS');
-  const [sips, setSips] = useState<any[]>([]);
+  const [sips, setSips] = useState<SipRecord[]>([]);
   const [loading, setLoading] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null); // ID of SIP being processed
   const [success, setSuccess] = useState(false);
 
-  // Form
+  // Create Form State
   const [amount, setAmount] = useState('');
-  const [frequency, setFrequency] = useState('MONTHLY');
-  const [date, setDate] = useState('');
+  const [sipType, setSipType] = useState<SipType>('MONTHLY');
+  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+  const [totalCycles, setTotalCycles] = useState('12');
 
   const RATE = MOCK_RATES.buy;
 
@@ -29,13 +71,40 @@ export const SIP: React.FC = () => {
   }, [user]);
 
   const fetchSIPs = async () => {
-    const { data } = await supabase
-      .from('sips')
-      .select('*')
-      .eq('user_phone', user?.phone)
-      .order('created_at', { ascending: false });
-    
-    if (data) setSips(data);
+    setFetchError(null);
+    if (!user?.phone) return;
+
+    try {
+      // Ensure we catch any connection issues or missing tables
+      const { data, error } = await supabase
+        .from('sips')
+        .select('*')
+        .eq('user_phone', user.phone)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        throw error;
+      }
+
+      setSips((data as SipRecord[]) || []);
+    } catch (err: any) {
+      console.error("Error fetching SIPs:", err);
+      const msg = getErrorMessage(err);
+      
+      if (msg.includes("42P01")) {
+        setFetchError("Database table 'sips' is missing. Please run the SQL setup script provided in the code comments.");
+      } else {
+        setFetchError(msg);
+      }
+    }
+  };
+
+  const calculateNextDate = (currentDate: string, type: SipType): string => {
+    const date = new Date(currentDate);
+    if (type === 'DAILY') date.setDate(date.getDate() + 1);
+    if (type === 'WEEKLY') date.setDate(date.getDate() + 7);
+    if (type === 'MONTHLY') date.setDate(date.getDate() + 30);
+    return date.toISOString().split('T')[0];
   };
 
   const handleCreateSIP = async () => {
@@ -43,26 +112,33 @@ export const SIP: React.FC = () => {
     setLoading(true);
 
     try {
-      // 1. Create SIP Record
+      // 1. Calculate Initial Next Due Date
+      const firstPaymentDate = startDate; 
+      const nextDue = calculateNextDate(firstPaymentDate, sipType);
+
+      // 2. Insert SIP Record
       const { error: sipError } = await supabase.from('sips').insert([
         {
           user_phone: user.phone,
-          amount: parseFloat(amount),
-          frequency,
-          next_due_date: date,
+          sip_type: sipType,
+          plan_amount: parseFloat(amount),
+          start_date: firstPaymentDate,
+          next_due_date: nextDue,
+          total_cycles: parseInt(totalCycles),
+          cycles_completed: 1, // First one done immediately
           status: 'ACTIVE'
         }
       ]);
 
       if (sipError) throw sipError;
 
-      // 2. Process First Installment (Immediate Buy)
+      // 3. Process First Installment (Immediate Buy with SIP type)
       const grams = parseFloat(amount) / RATE;
       
       const { error: txnError } = await supabase.from('transactions').insert([
         {
           user_phone: user.phone,
-          type: 'BUY', // SIP is technically a recurring BUY
+          type: TransactionType.SIP, 
           amount_inr: parseFloat(amount),
           grams: grams,
           rate_per_gram: RATE,
@@ -72,7 +148,7 @@ export const SIP: React.FC = () => {
 
       if (txnError) throw txnError;
 
-      // 3. Update User Balance
+      // 4. Update User Balance
       const newBalance = (Number(user.goldBalanceGrams) || 0) + grams;
       const { error: profileError } = await supabase
         .from('profiles')
@@ -93,6 +169,63 @@ export const SIP: React.FC = () => {
     }
   };
 
+  const handlePayInstallment = async (sip: SipRecord) => {
+    if (!user) return;
+    setActionLoading(sip.id);
+
+    try {
+      const currentCompleted = sip.cycles_completed + 1;
+      const isCompleted = currentCompleted >= sip.total_cycles;
+      const newNextDueDate = calculateNextDate(sip.next_due_date, sip.sip_type);
+      const newStatus = isCompleted ? 'COMPLETED' : 'ACTIVE';
+
+      // 1. Update SIP
+      const { error: updateError } = await supabase
+        .from('sips')
+        .update({
+          cycles_completed: currentCompleted,
+          next_due_date: newNextDueDate,
+          status: newStatus
+        })
+        .eq('id', sip.id);
+
+      if (updateError) throw updateError;
+
+      // 2. Create Transaction (SIP Type)
+      const grams = sip.plan_amount / RATE;
+      const { error: txnError } = await supabase.from('transactions').insert([
+        {
+          user_phone: user.phone,
+          type: TransactionType.SIP,
+          amount_inr: sip.plan_amount,
+          grams: grams,
+          rate_per_gram: RATE,
+          status: 'SUCCESS'
+        }
+      ]);
+
+      if (txnError) throw txnError;
+
+      // 3. Update Balance
+      const newBalance = (Number(user.goldBalanceGrams) || 0) + grams;
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ gold_balance: newBalance })
+        .eq('phone', user.phone);
+
+      if (profileError) throw profileError;
+
+      await refreshUser();
+      await fetchSIPs();
+
+    } catch (e) {
+      const msg = getErrorMessage(e);
+      alert("Payment failed: " + msg);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   if (success) {
     return (
       <div className="min-h-full bg-slate-50 flex flex-col items-center justify-center p-8 text-center animate-fade-in">
@@ -101,11 +234,11 @@ export const SIP: React.FC = () => {
         </div>
         <h2 className="text-3xl font-bold text-slate-900 mb-3">SIP Started!</h2>
         <p className="text-slate-500 text-center mb-10 leading-relaxed max-w-xs mx-auto">
-          Your Gold SIP of <span className="text-slate-900 font-bold">₹{amount}</span> has been set up successfully.<br/>
+          Your <span className="font-bold text-slate-900 capitalize">{sipType.toLowerCase()}</span> SIP of <span className="text-slate-900 font-bold">₹{amount}</span> has been set up.<br/>
           <span className="text-xs text-green-600 font-bold mt-2 block">First installment processed successfully.</span>
         </p>
         <div className="space-y-3 w-full">
-           <Button fullWidth size="lg" onClick={() => { setSuccess(false); setActiveTab('MY_SIPS'); setAmount(''); setDate(''); }}>View My SIPs</Button>
+           <Button fullWidth size="lg" onClick={() => { setSuccess(false); setActiveTab('MY_SIPS'); setAmount(''); setStartDate(new Date().toISOString().split('T')[0]); }}>View My SIPs</Button>
            <Button fullWidth variant="outline" onClick={() => navigate('/')}>Back to Home</Button>
         </div>
       </div>
@@ -136,73 +269,132 @@ export const SIP: React.FC = () => {
       <div className="flex-1 px-6 pb-24 overflow-y-auto">
          {activeTab === 'MY_SIPS' ? (
            <div className="space-y-4">
-              {sips.length > 0 ? sips.map(sip => (
-                <div key={sip.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
-                   <div className="absolute top-0 right-0 p-3 opacity-5 group-hover:opacity-10 transition-opacity">
-                      <CalendarClock size={80} className="text-slate-900" />
-                   </div>
-                   <div className="relative z-10">
-                      <div className="flex justify-between items-start mb-4">
-                         <div>
-                            <p className="text-xs text-slate-500 font-medium uppercase tracking-wide mb-1">SIP Amount</p>
-                            <h3 className="text-2xl font-bold text-slate-900">₹{sip.amount}</h3>
-                         </div>
-                         <div className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase border ${sip.status === 'ACTIVE' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-yellow-50 text-yellow-600 border-yellow-100'}`}>
-                           {sip.status}
-                         </div>
-                      </div>
-                      <div className="flex items-center gap-6 text-sm">
-                         <div>
-                           <p className="text-xs text-slate-400 mb-0.5">Frequency</p>
-                           <p className="font-semibold text-slate-700">{sip.frequency}</p>
-                         </div>
-                         <div>
-                           <p className="text-xs text-slate-400 mb-0.5">Next Date</p>
-                           <p className="font-semibold text-slate-700">{new Date(sip.next_due_date).toLocaleDateString()}</p>
-                         </div>
-                      </div>
-                   </div>
-                </div>
-              )) : (
-                <div className="text-center py-10 bg-white rounded-2xl border border-slate-100 border-dashed">
+              {fetchError && (
+                 <div className="bg-red-50 p-4 rounded-xl border border-red-100 flex items-start gap-3 animate-fade-in">
+                    <AlertTriangle size={20} className="text-red-500 shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <h3 className="text-sm font-bold text-red-800">Unable to load SIPs</h3>
+                      <p className="text-xs text-red-600 mt-1">{fetchError}</p>
+                      <button 
+                        onClick={fetchSIPs}
+                        className="mt-3 px-3 py-1.5 bg-red-100 text-red-700 text-xs font-bold rounded-lg hover:bg-red-200 transition-colors inline-flex items-center gap-2"
+                      >
+                        <RefreshCw size={12} /> Retry
+                      </button>
+                    </div>
+                 </div>
+              )}
+
+              {!fetchError && sips.length === 0 && (
+                <div className="text-center py-12 bg-white rounded-2xl border border-slate-100 border-dashed">
                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
                       <CalendarClock className="text-slate-400" size={32} />
                    </div>
-                   <p className="text-sm text-slate-500 mb-4">No Active SIPs</p>
+                   <p className="text-sm text-slate-500 mb-4">No Active SIPs Found</p>
                    <Button size="sm" variant="outline" onClick={() => setActiveTab('CREATE')}>Start Your First SIP</Button>
                 </div>
               )}
+
+              {sips.length > 0 && sips.map(sip => {
+                const progress = (sip.cycles_completed / sip.total_cycles) * 100;
+                const isProcessing = actionLoading === sip.id;
+                
+                return (
+                  <div key={sip.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group transition-all hover:shadow-md">
+                     <div className="absolute top-0 right-0 p-3 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity">
+                        <CalendarClock size={100} className="text-slate-900" />
+                     </div>
+                     
+                     <div className="relative z-10">
+                        {/* Header */}
+                        <div className="flex justify-between items-start mb-4">
+                           <div className="flex flex-col">
+                              <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase w-fit mb-2 ${
+                                sip.sip_type === 'DAILY' ? 'bg-blue-50 text-blue-600' : 
+                                sip.sip_type === 'WEEKLY' ? 'bg-purple-50 text-purple-600' : 'bg-gold-50 text-gold-600'
+                              }`}>
+                                {sip.sip_type}
+                              </span>
+                              <h3 className="text-2xl font-bold text-slate-900">₹{sip.plan_amount}</h3>
+                           </div>
+                           <div className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase border ${
+                             sip.status === 'ACTIVE' ? 'bg-green-50 text-green-600 border-green-100' : 
+                             sip.status === 'COMPLETED' ? 'bg-slate-100 text-slate-600 border-slate-200' : 'bg-red-50 text-red-600 border-red-100'
+                           }`}>
+                             {sip.status}
+                           </div>
+                        </div>
+
+                        {/* Progress */}
+                        <div className="mb-4">
+                           <div className="flex justify-between text-xs mb-1.5">
+                              <span className="text-slate-500">Progress</span>
+                              <span className="font-bold text-slate-900">{sip.cycles_completed}/{sip.total_cycles} Cycles</span>
+                           </div>
+                           <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                              <div className="h-full bg-slate-900 rounded-full transition-all duration-500" style={{ width: `${Math.min(progress, 100)}%` }}></div>
+                           </div>
+                        </div>
+
+                        {/* Footer Info */}
+                        <div className="flex items-center justify-between text-sm bg-slate-50 rounded-xl p-3 border border-slate-100">
+                           <div>
+                             <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold mb-0.5">Next Due</p>
+                             <div className="flex items-center gap-1.5">
+                               <Calendar size={12} className="text-slate-500"/>
+                               <p className="font-bold text-slate-700">
+                                 {sip.status === 'COMPLETED' ? '-' : new Date(sip.next_due_date).toLocaleDateString()}
+                               </p>
+                             </div>
+                           </div>
+                           
+                           {sip.status === 'ACTIVE' && (
+                             <Button 
+                               size="sm" 
+                               onClick={() => handlePayInstallment(sip)}
+                               isLoading={isProcessing}
+                               className="h-8 text-xs"
+                             >
+                               Pay Installment
+                             </Button>
+                           )}
+                        </div>
+                     </div>
+                  </div>
+                );
+              })}
            </div>
          ) : (
            <div className="space-y-6 animate-fade-in">
-              <div className="bg-purple-50 p-6 rounded-2xl border border-purple-100 text-center">
-                 <h3 className="text-purple-900 font-bold text-lg mb-2">Automate your Savings</h3>
-                 <p className="text-xs text-purple-700 leading-relaxed max-w-xs mx-auto">
-                   Invest small amounts regularly to build wealth over time. 
-                   Money will be auto-debited from your wallet.
+              <div className="bg-gradient-to-br from-purple-600 to-indigo-700 p-6 rounded-2xl text-white shadow-lg shadow-purple-500/20">
+                 <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
+                   <RefreshCw size={20} className="animate-spin-slow" /> Automate Savings
+                 </h3>
+                 <p className="text-xs text-purple-100 leading-relaxed max-w-xs opacity-90">
+                   Systematic Investment Plans help you average out market volatility. Start with as low as ₹100.
                  </p>
               </div>
 
-              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-5">
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-6">
                  <div>
-                    <label className="text-xs text-slate-500 font-medium mb-1.5 block">SIP Amount (₹)</label>
+                    <label className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2 block ml-1">SIP Amount (₹)</label>
                     <input 
                        type="number"
                        value={amount}
                        onChange={(e) => setAmount(e.target.value)}
                        placeholder="Min ₹100"
-                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-lg font-bold text-slate-900 focus:outline-none focus:border-purple-500"
+                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-4 text-xl font-bold text-slate-900 focus:outline-none focus:border-purple-500 transition-all placeholder:text-slate-300"
                     />
                  </div>
 
                  <div>
-                    <label className="text-xs text-slate-500 font-medium mb-1.5 block">Frequency</label>
-                    <div className="grid grid-cols-2 gap-3">
-                       {['WEEKLY', 'MONTHLY'].map(f => (
+                    <label className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2 block ml-1">Frequency</label>
+                    <div className="grid grid-cols-3 gap-2">
+                       {(['DAILY', 'WEEKLY', 'MONTHLY'] as SipType[]).map(f => (
                          <button 
                            key={f}
-                           onClick={() => setFrequency(f)}
-                           className={`py-3 rounded-xl text-xs font-bold border transition-all ${frequency === f ? 'bg-purple-500 text-white border-purple-500 shadow-md' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                           onClick={() => { setSipType(f); setTotalCycles(f === 'DAILY' ? '30' : f === 'WEEKLY' ? '12' : '12'); }}
+                           className={`py-3 rounded-xl text-[10px] sm:text-xs font-bold border transition-all ${sipType === f ? 'bg-purple-600 text-white border-purple-600 shadow-md transform scale-105' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
                          >
                            {f}
                          </button>
@@ -210,26 +402,61 @@ export const SIP: React.FC = () => {
                     </div>
                  </div>
 
-                 <div>
-                    <label className="text-xs text-slate-500 font-medium mb-1.5 block">Start Date</label>
-                    <input 
-                       type="date"
-                       value={date}
-                       onChange={(e) => setDate(e.target.value)}
-                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none focus:border-purple-500"
-                    />
+                 <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2 block ml-1">Start Date</label>
+                      <input 
+                         type="date"
+                         value={startDate}
+                         min={new Date().toISOString().split('T')[0]}
+                         onChange={(e) => setStartDate(e.target.value)}
+                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-purple-500 transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2 block ml-1">Total Cycles</label>
+                      <input 
+                         type="number"
+                         value={totalCycles}
+                         onChange={(e) => setTotalCycles(e.target.value)}
+                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:border-purple-500 transition-all"
+                      />
+                    </div>
                  </div>
               </div>
+
+              {/* Summary */}
+              {amount && totalCycles && (
+                <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs text-slate-500">Total Investment</span>
+                    <span className="text-sm font-bold text-slate-900">₹{(parseFloat(amount) * parseInt(totalCycles)).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-slate-500">Ends On</span>
+                    <span className="text-sm font-bold text-slate-900">
+                      {(() => {
+                        const end = new Date(startDate);
+                        const cycles = parseInt(totalCycles);
+                        if (sipType === 'DAILY') end.setDate(end.getDate() + cycles);
+                        if (sipType === 'WEEKLY') end.setDate(end.getDate() + (cycles * 7));
+                        if (sipType === 'MONTHLY') end.setDate(end.getDate() + (cycles * 30));
+                        return end.toLocaleDateString();
+                      })()}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               <Button 
                 fullWidth 
                 size="lg" 
                 onClick={handleCreateSIP}
                 isLoading={loading}
-                disabled={!amount || !date || parseFloat(amount) < 100}
-                className="bg-gradient-to-r from-purple-500 to-indigo-500 shadow-purple-500/20 border-none"
+                disabled={!amount || !startDate || !totalCycles || parseFloat(amount) < 100}
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 shadow-xl shadow-purple-500/20 border-none"
               >
-                Create SIP & Pay First Installment
+                Start SIP & Pay First Installment
               </Button>
            </div>
          )}

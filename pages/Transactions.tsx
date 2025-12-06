@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from '../components/Header';
 import { TransactionType } from '../types';
-import { TrendingUp, TrendingDown, Gift, Repeat, CreditCard, Loader2 } from '../components/ui/Icons';
+import { TrendingUp, TrendingDown, Gift, Repeat, CreditCard, Loader2, CalendarClock } from '../components/ui/Icons';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../utils/supabaseClient';
+import { useNavigate } from 'react-router-dom';
 
 export const Transactions: React.FC = () => {
   const [filter, setFilter] = useState<TransactionType | 'ALL'>('ALL');
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -54,7 +56,7 @@ export const Transactions: React.FC = () => {
       
       <div className="px-6 pt-2 pb-4 border-b border-slate-100 bg-white/80 backdrop-blur-xl sticky top-[60px] sm:top-[72px] z-20">
          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-            {['ALL', 'BUY', 'SELL', 'GIFT'].map((f) => (
+            {['ALL', 'BUY', 'SELL', 'SIP', 'GIFT'].map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f as any)}
@@ -64,7 +66,7 @@ export const Transactions: React.FC = () => {
                   : 'bg-slate-100 border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-700'
                 }`}
               >
-                {f === 'ALL' ? 'All' : f.charAt(0) + f.slice(1).toLowerCase()}
+                {f === 'ALL' ? 'All' : f === 'SIP' ? 'SIP' : f.charAt(0) + f.slice(1).toLowerCase()}
               </button>
             ))}
          </div>
@@ -77,21 +79,31 @@ export const Transactions: React.FC = () => {
           </div>
         ) : filtered.length > 0 ? (
           filtered.map((txn) => (
-            <div key={txn.id} className="flex items-center justify-between p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all cursor-pointer">
+            <div 
+              key={txn.id} 
+              className="flex items-center justify-between p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all cursor-pointer"
+              onClick={() => navigate(`/transaction/${txn.id}`, { state: { transaction: txn } })}
+            >
               <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 border border-slate-50 ${
                   txn.type === TransactionType.BUY ? 'bg-green-50 text-green-600' : 
                   txn.type === TransactionType.SELL ? 'bg-red-50 text-red-600' : 
                   txn.type === TransactionType.GIFT ? 'bg-purple-50 text-purple-600' :
+                  txn.type === TransactionType.SIP ? 'bg-indigo-50 text-indigo-600' :
                   'bg-blue-50 text-blue-600'
                 }`}>
                   {txn.type === TransactionType.BUY ? <TrendingUp size={20} /> : 
                    txn.type === TransactionType.SELL ? <TrendingDown size={20} /> : 
-                   txn.type === TransactionType.GIFT ? <Gift size={20} /> : <Repeat size={20} />}
+                   txn.type === TransactionType.GIFT ? <Gift size={20} /> : 
+                   txn.type === TransactionType.SIP ? <CalendarClock size={20} /> :
+                   <Repeat size={20} />}
                 </div>
                 <div>
                   <p className="text-sm font-bold text-slate-900 capitalize tracking-tight">
-                    {txn.type === 'BUY' ? 'Bought Gold' : txn.type === 'SELL' ? 'Sold Gold' : txn.type.toLowerCase()}
+                    {txn.type === 'BUY' ? 'Bought Gold' : 
+                     txn.type === 'SELL' ? 'Sold Gold' : 
+                     txn.type === 'SIP' ? 'Gold SIP' :
+                     txn.type.toLowerCase()}
                   </p>
                   <div className="flex items-center gap-2 mt-0.5">
                      <p className="text-[10px] text-slate-500 font-medium">{new Date(txn.date).toLocaleDateString()}</p>
@@ -102,9 +114,12 @@ export const Transactions: React.FC = () => {
               </div>
               <div className="text-right">
                 <p className={`text-sm font-bold ${
-                   txn.type === 'BUY' ? 'text-green-600' : txn.type === 'SELL' ? 'text-slate-900' : 'text-slate-600'
+                   txn.type === 'BUY' ? 'text-green-600' : 
+                   txn.type === 'SIP' ? 'text-green-600' :
+                   txn.type === 'SELL' ? 'text-slate-900' : 
+                   'text-slate-600'
                 }`}>
-                  {txn.type === TransactionType.BUY ? '+' : '-'}{Number(txn.grams).toFixed(4)} g
+                  {txn.type === TransactionType.BUY || txn.type === TransactionType.SIP ? '+' : '-'}{Number(txn.grams).toFixed(4)} g
                 </p>
                 <p className="text-xs text-slate-500 font-mono">₹{Number(txn.amountInr).toLocaleString()}</p>
               </div>

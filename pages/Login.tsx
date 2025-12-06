@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
-import { Phone, ArrowRight, Loader2, CheckCircle, ShieldCheck, ScanFace, Fingerprint } from '../components/ui/Icons';
+import { Phone, ArrowRight, Loader2, CheckCircle, ShieldCheck, ScanFace, Fingerprint, Crown } from '../components/ui/Icons';
 import { useAuth } from '../context/AuthContext';
 import { getErrorMessage } from '../utils/helpers';
 
@@ -70,12 +70,9 @@ export const Login: React.FC = () => {
           navigate(from, { replace: true });
         }
       } else {
-        // Ensure error is a string explicitly
-        let errMsg = "Login failed. Please check your connection.";
-        if (typeof loginError === 'string' && loginError.trim() !== '') {
-          errMsg = loginError;
-        }
-        setError(errMsg);
+        // Ensure error is a string explicitly using helper
+        const safeError = getErrorMessage(loginError || "Login failed. Please try again.");
+        setError(safeError);
       }
     } catch (e: any) {
       const msg = getErrorMessage(e);
@@ -107,12 +104,16 @@ export const Login: React.FC = () => {
       <div className="absolute bottom-[-100px] left-[-100px] w-64 h-64 bg-blue-500/10 rounded-full blur-[60px] pointer-events-none"></div>
 
       <div className="flex-1 flex flex-col justify-center relative z-10">
-        <div className="mb-8 text-center">
-           <div className="w-16 h-16 bg-gradient-to-br from-gold-400 to-gold-600 rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-lg shadow-gold-500/30">
-             <ShieldCheck size={32} className="text-white" />
+        <div className="mb-10 text-center">
+           <div className="mx-auto mb-6 flex flex-col items-center justify-center">
+             <div className="w-14 h-14 bg-[#C4A46D]/10 rounded-full flex items-center justify-center mb-3">
+               <Crown size={32} className="text-[#C4A46D]" strokeWidth={1.5} />
+             </div>
+             <h1 className="text-3xl font-serif font-bold text-[#C4A46D] tracking-[0.15em] leading-none ml-1">PMJ</h1>
+             <p className="text-[10px] font-medium text-[#8b7e66] tracking-[0.3em] uppercase leading-none mt-1 ml-1">JEWELS</p>
            </div>
-           <h1 className="text-3xl font-bold text-slate-900 mb-2">Welcome Back</h1>
-           <p className="text-slate-500">Securely login to your Aura DigiGold account.</p>
+           <h1 className="text-2xl font-bold text-slate-900 mb-2">Welcome Back</h1>
+           <p className="text-slate-500">Securely login to your PMJ DigiGold account.</p>
         </div>
 
         {/* Biometric Option */}

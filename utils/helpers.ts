@@ -1,48 +1,38 @@
-
 export const getErrorMessage = (error: any): string => {
   if (!error) return "An unknown error occurred";
 
-  let message = "An unexpected error occurred";
+  // 1. If it's already a string
+  if (typeof error === 'string') return error;
 
-  // If it's already a string
-  if (typeof error === 'string') {
-    message = error;
-  } 
-  // Standard JS Error
-  else if (error instanceof Error) {
-    message = error.message;
-  } 
-  // Object handling
-  else if (typeof error === 'object') {
-    // Recursive checks for nested properties
-    if (error.message) {
-         if (typeof error.message === 'object') return getErrorMessage(error.message);
-         message = String(error.message);
-    }
-    else if (error.error_description) message = String(error.error_description);
-    else if (error.msg) message = String(error.msg);
-    else if (error.error) {
-         if (typeof error.error === 'object') return getErrorMessage(error.error);
-         message = String(error.error);
-    }
-    else if (error.data && error.data.message) {
-         message = String(error.data.message);
-    }
-    else {
-        // Fallback: try to stringify
-        try {
-            const json = JSON.stringify(error);
-            if (json !== '{}' && !json.includes('[object Object]')) {
-                message = `Error details: ${json}`;
-            }
-        } catch {}
-    }
+  // 2. Standard Error object (properties like message are often not enumerable in JSON.stringify)
+  if (error instanceof Error) {
+    return error.message;
   }
 
-  // Final filter for the specific string pattern
-  if (message.includes('[object Object]')) {
-      return "An error occurred (details unavailable).";
+  // 3. Common API/Supabase error shapes
+  if (typeof error === 'object') {
+    // Prioritize human readable messages
+    if (error.message) return String(error.message);
+    if (error.error_description) return String(error.error_description);
+    if (error.details) return String(error.details);
+    if (error.hint) return String(error.hint);
+    if (error.msg) return String(error.msg);
+    
+    // Postgres/Supabase code only fallback
+    if (error.code) return `Database Error: ${error.code}`;
   }
 
-  return message;
+  // 4. Fallback to JSON if possible to show structure
+  try {
+    const json = JSON.stringify(error);
+    if (json && json !== '{}' && !json.includes('[object Object]')) {
+      // Limit length to avoid massive error dumps
+      return json.slice(0, 200) + (json.length > 200 ? '...' : '');
+    }
+  } catch (e) {
+    // ignore stringify errors
+  }
+
+  // 5. Last resort
+  return String(error); 
 };

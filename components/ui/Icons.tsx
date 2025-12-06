@@ -42,7 +42,14 @@ import {
   PauseCircle, 
   PlayCircle,
   Ticket,
-  Sparkles
+  Sparkles,
+  RefreshCw,
+  Clock,
+  Share2,
+  Download,
+  Copy,
+  Store,
+  Crown
 } from 'lucide-react';
 
 export {
@@ -89,5 +96,12 @@ export {
   PauseCircle, 
   PlayCircle,
   Ticket,
-  Sparkles
+  Sparkles,
+  RefreshCw,
+  Clock,
+  Share2,
+  Download,
+  Copy,
+  Store,
+  Crown
 };

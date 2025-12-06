@@ -6,6 +6,7 @@ import { BuyGold } from './pages/BuyGold';
 import { SellGold } from './pages/SellGold';
 import { KYC } from './pages/KYC';
 import { Transactions } from './pages/Transactions';
+import { TransactionDetail } from './pages/TransactionDetail';
 import { Profile } from './pages/Profile';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
@@ -13,6 +14,7 @@ import { Terms } from './pages/Terms';
 import { GiftGold } from './pages/GiftGold';
 import { SIP } from './pages/SIP';
 import { Redeem } from './pages/Redeem';
+import { WalletPage } from './pages/Wallet';
 import { Notifications } from './pages/Notifications';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Loader2 } from './components/ui/Icons';
@@ -56,10 +58,12 @@ const AppRoutes: React.FC = () => {
           <Route path="/sip" element={<ProtectedRoute><SIP /></ProtectedRoute>} />
           
           <Route path="/redeem" element={<ProtectedRoute><Redeem /></ProtectedRoute>} />
+          <Route path="/wallet" element={<ProtectedRoute><WalletPage /></ProtectedRoute>} />
           <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
 
           <Route path="/kyc-flow" element={<ProtectedRoute><KYC /></ProtectedRoute>} />
           <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
+          <Route path="/transaction/:id" element={<ProtectedRoute><TransactionDetail /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           
           <Route path="*" element={<Navigate to="/" replace />} />

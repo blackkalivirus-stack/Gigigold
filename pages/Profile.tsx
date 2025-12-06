@@ -4,7 +4,7 @@ import {
   User, ShieldCheck, ChevronRight, FileText, Lock, CheckCircle, 
   Edit2, Mail, MapPin, Phone, Banknote, Plus, Trash2, 
   Settings, HelpCircle, LogOut, Info, Eye, X, AlertTriangle, Fingerprint,
-  Bell
+  Bell, Crown
 } from '../components/ui/Icons';
 import { Button } from '../components/ui/Button';
 import { Header } from '../components/Header';
@@ -556,8 +556,11 @@ export const Profile: React.FC = () => {
           <Button onClick={handleLogout} variant="outline" fullWidth className="text-red-500 border-red-200 hover:border-red-300 hover:bg-red-50 hover:text-red-600">
              <LogOut size={16} className="mr-2" /> Sign Out
           </Button>
-          <div className="flex flex-col items-center mt-6 gap-1">
-             <p className="text-[10px] text-slate-400 font-medium tracking-wide">Aura DigiGold v1.0.2</p>
+          <div className="flex flex-col items-center mt-6 gap-2">
+             <div className="w-8 h-8 bg-[#C4A46D]/10 rounded-full flex items-center justify-center">
+               <Crown size={16} className="text-[#C4A46D]" strokeWidth={2} />
+             </div>
+             <p className="text-[10px] text-slate-400 font-medium tracking-wide">PMJ JEWELS - DIGIGOLD v1.0.2</p>
              <div className="flex items-center gap-1.5 opacity-50">
                 <ShieldCheck size={10} className="text-slate-400"/>
                 <p className="text-[10px] text-slate-400">RBI Compliant & Secure</p>

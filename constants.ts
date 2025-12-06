@@ -1,6 +1,6 @@
 import { GoldRate } from './types';
 
-export const APP_NAME = "Aura DigiGold";
+export const APP_NAME = "PMJ JEWELS - DIGIGOLD";
 
 export const MOCK_RATES: GoldRate = {
   buy: 7250.45,

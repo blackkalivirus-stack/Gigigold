@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "1. Initialize Android Platform",
+      "type": "shell",
+      "command": "npm install && npm run build && npx cap add android",
+      "problemMatcher": [],
+      "group": "none",
+      "detail": "Run this ONCE to create the android folder."
+    },
+    {
+      "label": "2. Sync & Open Android Studio",
+      "type": "shell",
+      "command": "npm run build && npx cap sync && npx cap open android",
+      "problemMatcher": [],
+      "group": "build",
+      "detail": "Builds your React code and opens Android Studio to generate the APK."
+    },
+    {
+      "label": "3. Start Web Server (Dev)",
+      "type": "npm",
+      "script": "dev",
+      "problemMatcher": [],
+      "group": "test",
+      "isBackground": true
+    }
+  ]
+}

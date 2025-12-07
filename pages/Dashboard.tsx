@@ -16,11 +16,17 @@ export const Dashboard: React.FC = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
   const [timeRange, setTimeRange] = useState<'1D' | '1W' | '1M' | '1Y'>('1D');
+  const [greeting, setGreeting] = useState('Welcome');
 
   useEffect(() => {
     setIsMounted(true);
     const savedImg = localStorage.getItem('profileImage');
     if (savedImg) setProfileImg(savedImg);
+
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting('Good Morning');
+    else if (hour < 18) setGreeting('Good Afternoon');
+    else setGreeting('Good Evening');
   }, []);
 
   useEffect(() => {
@@ -52,6 +58,7 @@ export const Dashboard: React.FC = () => {
   }, [user]);
 
   const handleActionClick = (path: string) => {
+    if (navigator.vibrate) navigator.vibrate(10);
     if (!user) navigate('/login');
     else navigate(path);
   };
@@ -86,7 +93,7 @@ export const Dashboard: React.FC = () => {
             )}
           </div>
           <div onClick={() => handleActionClick('/profile')} className="cursor-pointer hidden sm:block">
-            <p className="text-[10px] text-slate-600 font-bold uppercase tracking-wider">Welcome,</p>
+            <p className="text-[10px] text-slate-600 font-bold uppercase tracking-wider">{greeting},</p>
             <h2 className="text-sm font-bold text-slate-900 leading-tight truncate max-w-[100px]">
               {user ? user.firstName : 'Guest'}
             </h2>
@@ -163,26 +170,26 @@ export const Dashboard: React.FC = () => {
       {/* Quick Actions */}
       <div className="px-6">
         <div className="grid grid-cols-4 gap-4">
-           <button onClick={() => handleActionClick('/gift')} className="flex flex-col items-center gap-2 group cursor-pointer">
-              <div className="w-[4.5rem] h-[4.5rem] rounded-3xl bg-white flex items-center justify-center border border-slate-100 shadow-soft group-hover:shadow-lg transition-all group-active:scale-95">
+           <button onClick={() => handleActionClick('/gift')} className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform duration-200">
+              <div className="w-[4.5rem] h-[4.5rem] rounded-3xl bg-white flex items-center justify-center border border-slate-100 shadow-soft group-hover:shadow-lg transition-all">
                 <Gift className="text-gold-500 w-7 h-7" strokeWidth={1.5} />
               </div>
               <span className="text-[11px] font-bold text-slate-600">Gift</span>
            </button>
-           <button onClick={() => handleActionClick('/redeem')} className="flex flex-col items-center gap-2 group cursor-pointer">
-              <div className="w-[4.5rem] h-[4.5rem] rounded-3xl bg-white flex items-center justify-center border border-slate-100 shadow-soft group-hover:shadow-lg transition-all group-active:scale-95">
+           <button onClick={() => handleActionClick('/redeem')} className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform duration-200">
+              <div className="w-[4.5rem] h-[4.5rem] rounded-3xl bg-white flex items-center justify-center border border-slate-100 shadow-soft group-hover:shadow-lg transition-all">
                 <Wallet className="text-blue-500 w-7 h-7" strokeWidth={1.5} />
               </div>
               <span className="text-[11px] font-bold text-slate-600">Redeem</span>
            </button>
-           <button onClick={() => handleActionClick('/kyc-flow')} className="flex flex-col items-center gap-2 group cursor-pointer">
-              <div className="w-[4.5rem] h-[4.5rem] rounded-3xl bg-white flex items-center justify-center border border-slate-100 shadow-soft group-hover:shadow-lg transition-all group-active:scale-95">
+           <button onClick={() => handleActionClick('/kyc-flow')} className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform duration-200">
+              <div className="w-[4.5rem] h-[4.5rem] rounded-3xl bg-white flex items-center justify-center border border-slate-100 shadow-soft group-hover:shadow-lg transition-all">
                  <ShieldCheck className="text-green-500 w-7 h-7" strokeWidth={1.5} />
               </div>
               <span className="text-[11px] font-bold text-slate-600">KYC</span>
            </button>
-           <button onClick={() => handleActionClick('/sip')} className="flex flex-col items-center gap-2 group cursor-pointer">
-              <div className="w-[4.5rem] h-[4.5rem] rounded-3xl bg-white flex items-center justify-center border border-slate-100 shadow-soft group-hover:shadow-lg transition-all group-active:scale-95">
+           <button onClick={() => handleActionClick('/sip')} className="flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition-transform duration-200">
+              <div className="w-[4.5rem] h-[4.5rem] rounded-3xl bg-white flex items-center justify-center border border-slate-100 shadow-soft group-hover:shadow-lg transition-all">
                  <CalendarClock className="text-indigo-500 w-7 h-7" strokeWidth={1.5} />
               </div>
               <span className="text-[11px] font-bold text-slate-600">SIP</span>

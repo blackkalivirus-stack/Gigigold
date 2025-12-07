@@ -47,12 +47,25 @@ export const WalletPage: React.FC = () => {
         if (data) setTransactions(data);
       } 
       else if (activeTab === 'SIPS') {
-        const { data } = await supabase
+        // Fetch from Supabase
+        const { data, error } = await supabase
           .from('sips')
           .select('*')
           .eq('user_phone', user?.phone)
           .order('created_at', { ascending: false });
-        if (data) setSips(data);
+        
+        let fetchedSips = data || [];
+
+        // Merge with LocalStorage (for fallback/demo)
+        const localSips = JSON.parse(localStorage.getItem(`sips_${user?.phone}`) || '[]');
+        
+        // Simple de-dupe based on ID if needed, but for now mostly unique
+        const mergedSips = [...fetchedSips, ...localSips.filter((l: any) => !fetchedSips.some((r: any) => r.id === l.id))];
+        
+        // Re-sort
+        mergedSips.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        
+        setSips(mergedSips);
       }
       else if (activeTab === 'VOUCHERS') {
         const { data } = await supabase
@@ -74,7 +87,11 @@ export const WalletPage: React.FC = () => {
     <div className="space-y-4 animate-fade-in">
        {transactions.length > 0 ? (
          transactions.map(txn => (
-           <div key={txn.id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-center group hover:border-gold-200 transition-all">
+           <div 
+             key={txn.id} 
+             onClick={() => navigate(`/transaction/${txn.id}`, { state: { transaction: txn } })}
+             className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex justify-between items-center group hover:border-gold-200 transition-all active:scale-[0.98] cursor-pointer"
+           >
               <div className="flex items-center gap-4">
                  <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600 border border-green-100 group-hover:bg-green-100 transition-colors">
                     <TrendingUp size={18} />
@@ -107,7 +124,11 @@ export const WalletPage: React.FC = () => {
     <div className="space-y-4 animate-fade-in">
        {sips.length > 0 ? (
          sips.map(sip => (
-           <div key={sip.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
+           <div 
+             key={sip.id} 
+             onClick={() => navigate('/sip')}
+             className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group active:scale-[0.98] transition-transform cursor-pointer"
+            >
               <div className="flex justify-between items-start mb-2">
                  <div>
                     <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded uppercase tracking-wider">{sip.sip_type}</span>
@@ -119,7 +140,7 @@ export const WalletPage: React.FC = () => {
               </div>
               <div className="flex items-center justify-between text-xs text-slate-500 mt-2 pt-2 border-t border-slate-50">
                  <span>Next Due: {new Date(sip.next_due_date).toLocaleDateString()}</span>
-                 <button onClick={() => navigate('/sip')} className="font-bold text-purple-600 flex items-center gap-1">Manage <ChevronRight size={12} /></button>
+                 <span className="font-bold text-purple-600 flex items-center gap-1">Manage <ChevronRight size={12} /></span>
               </div>
            </div>
          ))
@@ -139,7 +160,11 @@ export const WalletPage: React.FC = () => {
            // Mock code generation for display to verify requirement "see all redeemed vouchers"
            const mockCode = `PMJ-${txn.id.substring(0,6).toUpperCase()}`;
            return (
-             <div key={txn.id} className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group border-l-4 border-l-gold-500">
+             <div 
+               key={txn.id} 
+               onClick={() => navigate(`/transaction/${txn.id}`, { state: { transaction: txn } })}
+               className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group border-l-4 border-l-gold-500 active:scale-[0.98] transition-transform cursor-pointer"
+             >
                 <div className="flex justify-between items-start mb-3">
                    <div>
                       <h4 className="text-sm font-bold text-slate-900">PMJ Jewels Voucher</h4>
@@ -151,7 +176,7 @@ export const WalletPage: React.FC = () => {
                    </div>
                 </div>
                 
-                <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 border-dashed flex justify-between items-center">
+                <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 border-dashed flex justify-between items-center" onClick={(e) => { e.stopPropagation(); }}>
                    <div>
                       <p className="text-[10px] text-slate-400 uppercase font-bold">Redemption Code</p>
                       <p className="text-sm font-mono font-bold text-slate-800 tracking-wide">{mockCode}</p>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Loader2 } from './Icons';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'danger';
@@ -16,6 +17,7 @@ export const Button: React.FC<ButtonProps> = ({
   size = 'md',
   className = '',
   disabled,
+  onClick,
   ...props
 }) => {
   const baseStyles = "relative inline-flex items-center justify-center font-bold tracking-wide transition-all duration-300 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]";
@@ -35,6 +37,20 @@ export const Button: React.FC<ButtonProps> = ({
     lg: "h-14 px-8 text-base rounded-2xl"
   };
 
+  const handlePress = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    try {
+      // Try Capacitor native haptics first
+      await Haptics.impact({ style: ImpactStyle.Light });
+    } catch (err) {
+      // Fallback to web vibration API
+      if (navigator.vibrate) {
+        navigator.vibrate(10);
+      }
+    }
+    
+    if (onClick) onClick(e);
+  };
+
   return (
     <button
       className={`
@@ -45,6 +61,7 @@ export const Button: React.FC<ButtonProps> = ({
         ${className}
       `}
       disabled={isLoading || disabled}
+      onClick={handlePress}
       {...props}
     >
       {isLoading && (

@@ -1,25 +1,42 @@
 {
-  "name": "pmj-jewels---digigold",
+  "name": "pmj-digigold-app",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "mobile:init": "npm install && npm run build && npx cap add android",
+    "mobile:init:ios": "npm install && npm run build && npx cap add ios",
+    "mobile:sync": "npm run build && npx cap sync",
+    "mobile:open:android": "npx cap open android",
+    "mobile:open:ios": "npx cap open ios",
+    "build:apk": "npm run mobile:sync && echo 'Opening Android Studio... Wait for it to load, then go to Menu -> Build -> Build APK' && npx cap open android"
   },
   "dependencies": {
-    "react": "^19.2.0",
-    "lucide-react": "^0.555.0",
-    "recharts": "^3.5.1",
-    "react-dom": "^19.2.0",
-    "react-router-dom": "^7.10.0",
-    "@supabase/supabase-js": "2.45.1"
+    "@capacitor/app": "^5.0.0",
+    "@capacitor/core": "^5.7.0",
+    "@capacitor/haptics": "^5.0.0",
+    "@capacitor/status-bar": "^5.0.0",
+    "@supabase/supabase-js": "2.45.1",
+    "lucide-react": "^0.344.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.3",
+    "recharts": "^2.12.2"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@vitejs/plugin-react": "^5.0.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "@capacitor/cli": "^5.7.0",
+    "@capacitor/android": "^5.7.0",
+    "@capacitor/ios": "^5.7.0",
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.3",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0"
   }
 }

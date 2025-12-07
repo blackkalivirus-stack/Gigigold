@@ -60,7 +60,7 @@ export const Transactions: React.FC = () => {
               <button
                 key={f}
                 onClick={() => setFilter(f as any)}
-                className={`px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap border transition-all duration-300 ${
+                className={`px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap border transition-all duration-300 active:scale-95 ${
                   filter === f 
                   ? 'bg-gold-500 border-gold-500 text-white shadow-md shadow-gold-500/20' 
                   : 'bg-slate-100 border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-700'
@@ -81,7 +81,7 @@ export const Transactions: React.FC = () => {
           filtered.map((txn) => (
             <div 
               key={txn.id} 
-              className="flex items-center justify-between p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all cursor-pointer"
+              className="flex items-center justify-between p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all cursor-pointer active:scale-[0.98]"
               onClick={() => navigate(`/transaction/${txn.id}`, { state: { transaction: txn } })}
             >
               <div className="flex items-center gap-4">

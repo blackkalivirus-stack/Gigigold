@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
-import { Bell, TrendingUp, TrendingDown, ChevronRight, ShieldCheck, Gift, Wallet, CalendarClock, Lock, User as UserIcon, Crown } from '../components/ui/Icons';
+import { Bell, TrendingUp, TrendingDown, ChevronRight, ShieldCheck, Gift, Wallet, CalendarClock, Lock, User as UserIcon } from '../components/ui/Icons';
 import { Button } from '../components/ui/Button';
+import { Logo } from '../components/Logo'; // Import new Logo component
 import { MOCK_RATES, HISTORICAL_DATA } from '../constants';
 import { TransactionType } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -67,10 +68,11 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-8 animate-fade-in pt-safe min-h-full">
-      {/* Header with restored background color */}
+      {/* Header - Fixed Layout */}
       <header className="px-6 py-4 flex justify-between items-center sticky top-0 z-30 bg-slate-50/95 backdrop-blur-md shadow-sm transition-all">
-        <div className="flex items-center gap-3 w-1/3">
-          <div className="relative cursor-pointer group" onClick={() => handleActionClick('/profile')}>
+        {/* Left: Profile & Greeting (Flexible Width) */}
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="relative cursor-pointer group shrink-0" onClick={() => handleActionClick('/profile')}>
             {user ? (
               <div className="w-10 h-10 rounded-full p-0.5 bg-white shadow-sm border border-slate-200 overflow-hidden">
                  <img 
@@ -78,7 +80,6 @@ export const Dashboard: React.FC = () => {
                    alt="Profile" 
                    className="w-full h-full rounded-full object-cover"
                    onError={(e) => {
-                     // Fallback if profile image fails
                      e.currentTarget.src = 'https://ui-avatars.com/api/?name=User&background=f1f5f9&color=64748b';
                    }}
                  />
@@ -92,24 +93,23 @@ export const Dashboard: React.FC = () => {
               <span className="absolute 0 top-0 -right-0.5 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
             )}
           </div>
-          <div onClick={() => handleActionClick('/profile')} className="cursor-pointer hidden sm:block">
-            <p className="text-[10px] text-slate-600 font-bold uppercase tracking-wider">{greeting},</p>
-            <h2 className="text-sm font-bold text-slate-900 leading-tight truncate max-w-[100px]">
+          <div onClick={() => handleActionClick('/profile')} className="cursor-pointer hidden sm:block truncate">
+            <p className="text-[10px] text-slate-600 font-bold uppercase tracking-wider truncate">{greeting},</p>
+            <h2 className="text-sm font-bold text-slate-900 leading-tight truncate">
               {user ? user.firstName : 'Guest'}
             </h2>
           </div>
         </div>
 
-        {/* Center Logo - PMJ Jewels (Icon + Text) */}
-        <div className="flex flex-col items-center justify-center w-1/3">
-          <div className="flex flex-col items-center select-none transform hover:scale-105 transition-transform duration-300 cursor-pointer" onClick={() => navigate('/')}>
-             <Crown size={24} className="text-[#C4A46D] mb-0.5" strokeWidth={1.5} />
-             <h1 className="text-xl font-serif font-bold text-[#C4A46D] tracking-[0.15em] leading-none ml-1">PMJ</h1>
-             <p className="text-[6px] font-medium text-[#8b7e66] tracking-[0.3em] uppercase leading-none mt-0.5 ml-0.5">JEWELS</p>
+        {/* Center: Logo (Fixed Position) */}
+        <div className="flex flex-col items-center justify-center absolute left-1/2 -translate-x-1/2">
+          <div className="transform hover:scale-105 transition-transform duration-300 cursor-pointer" onClick={() => navigate('/')}>
+             <Logo className="h-10 w-auto" />
           </div>
         </div>
 
-        <div className="flex justify-end w-1/3">
+        {/* Right: Notifications */}
+        <div className="flex justify-end flex-1">
            <button 
             onClick={() => navigate('/notifications')}
             className="p-2.5 rounded-full bg-white border border-slate-200 text-slate-600 hover:text-gold-600 transition-all active:scale-95 shadow-sm"

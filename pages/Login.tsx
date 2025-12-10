@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
-import { Phone, ArrowRight, Loader2, CheckCircle, ShieldCheck, ScanFace, Fingerprint, Crown } from '../components/ui/Icons';
+import { Phone, ArrowRight, Loader2, CheckCircle, ShieldCheck, ScanFace, Fingerprint } from '../components/ui/Icons';
 import { useAuth } from '../context/AuthContext';
 import { getErrorMessage } from '../utils/helpers';
+import { Logo } from '../components/Logo'; // Import Logo
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -106,11 +107,7 @@ export const Login: React.FC = () => {
       <div className="flex-1 flex flex-col justify-center relative z-10">
         <div className="mb-10 text-center">
            <div className="mx-auto mb-6 flex flex-col items-center justify-center">
-             <div className="w-14 h-14 bg-[#C4A46D]/10 rounded-full flex items-center justify-center mb-3">
-               <Crown size={32} className="text-[#C4A46D]" strokeWidth={1.5} />
-             </div>
-             <h1 className="text-3xl font-serif font-bold text-[#C4A46D] tracking-[0.15em] leading-none ml-1">PMJ</h1>
-             <p className="text-[10px] font-medium text-[#8b7e66] tracking-[0.3em] uppercase leading-none mt-1 ml-1">JEWELS</p>
+             <Logo className="h-20 w-auto mb-2" />
            </div>
            <h1 className="text-2xl font-bold text-slate-900 mb-2">Welcome Back</h1>
            <p className="text-slate-500">Securely login to your PMJ DigiGold account.</p>

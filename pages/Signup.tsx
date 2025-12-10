@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
-import { User, Phone, Mail, Calendar, ArrowRight, ShieldCheck, CheckCircle, Info, AlertTriangle, Crown } from '../components/ui/Icons';
+import { User, Phone, Mail, Calendar, ArrowRight, ShieldCheck, CheckCircle, Info, AlertTriangle } from '../components/ui/Icons';
 import { Header } from '../components/Header';
 import { supabase } from '../utils/supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { getErrorMessage } from '../utils/helpers';
+import { Logo } from '../components/Logo'; // Import Logo
 
 export const Signup: React.FC = () => {
   const navigate = useNavigate();
@@ -101,11 +102,7 @@ export const Signup: React.FC = () => {
       <div className="flex-1 px-6 pt-6 pb-24 overflow-y-auto">
         <div className="mb-6 flex flex-col items-center text-center">
            <div className="flex flex-col items-center justify-center mb-4">
-             <div className="w-12 h-12 bg-[#C4A46D]/10 rounded-full flex items-center justify-center mb-2">
-               <Crown size={28} className="text-[#C4A46D]" strokeWidth={1.5} />
-             </div>
-             <h1 className="text-xl font-serif font-bold text-[#C4A46D] tracking-[0.15em] leading-none ml-1">PMJ</h1>
-             <p className="text-[8px] font-medium text-[#8b7e66] tracking-[0.3em] uppercase leading-none mt-0.5 ml-1">JEWELS</p>
+             <Logo className="h-16 w-auto mb-2" />
            </div>
            <h2 className="text-2xl font-bold text-slate-900 mb-1">Getting Started</h2>
            <p className="text-slate-500 text-sm">Create an account to start your PMJ gold savings journey.</p>

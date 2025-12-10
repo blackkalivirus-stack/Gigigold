@@ -588,7 +588,7 @@ export const Profile: React.FC = () => {
         onBack={handleBack}
       />
 
-      <div className="flex-1 px-6 pt-6 pb-24 overflow-y-auto no-scrollbar">
+      <div className="flex-1 px-6 pt-6">
          {currentView === 'MAIN' && renderMain()}
          {currentView === 'PERSONAL' && renderPersonal()}
          {currentView === 'BANKS' && renderBanks()}

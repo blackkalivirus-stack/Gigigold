@@ -5,12 +5,22 @@ const config: CapacitorConfig = {
   appName: 'PMJ DigiGold',
   webDir: 'dist',
   server: {
-    androidScheme: 'https'
+    androidScheme: 'https',
+    // Ensure we don't try to load from a live server in production
+    cleartext: true
   },
   plugins: {
     StatusBar: {
       style: 'DARK',
-      overlay: false,
+      overlay: true, // Make status bar transparent over the app
+    },
+    SplashScreen: {
+      launchShowDuration: 2000,
+      backgroundColor: "#E5E0D8", // Updated to match App Theme (Beige/Gold)
+      showSpinner: false,
+      androidScaleType: "CENTER_CROP",
+      splashFullScreen: true,
+      splashImmersive: true,
     }
   }
 };

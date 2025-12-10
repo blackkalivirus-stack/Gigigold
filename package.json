@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "mobile:init": "npm install && npm run build && npx cap add android && npx cap add ios",
+    "mobile:update": "npm run build && npx cap sync",
     "generate:android": "npm run build && npx cap add android",
     "generate:ios": "npm run build && npx cap add ios",
     "open:android": "npx cap open android",

@@ -1,90 +1,47 @@
-# 📱 Mobile App Build Guide (Android & iOS)
+# 📱 Mobile App Generation Guide
 
-This project uses **Capacitor** to wrap the React web app into native mobile apps.
+Follow these steps to convert your React app into a mobile app.
 
----
+## 1. Initial Setup (Generate Folders)
+**Run this once** to create the `android` and `ios` folders.
 
-## 🚀 Phase 1: Initialization (First Time Only)
-Before you can build the app, you need to generate the native project folders.
+```bash
+npm run mobile:init
+```
 
-1.  Open your terminal.
-2.  Run the initialization script:
+*   If this fails with "Android/iOS platform already exists", it means you've done this before. You can skip to Step 2.
+
+## 2. Build Android APK
+**Run this to build the installation file.**
+
+1.  Run command:
     ```bash
-    npm run mobile:init
+    npm run build:apk
     ```
-    ✅ **Success:** You will see new `android` and `ios` folders appear in your file explorer.
+    *This will build your web code and open Android Studio.*
 
----
+2.  **Inside Android Studio:**
+    *   Wait for indexing (bottom right progress bars) to finish.
+    *   Click **Build** (Top Menu) > **Build Bundle(s) / APK(s)** > **Build APK(s)**.
+    *   When finished, click **"locate"** in the popup to find your `.apk` file.
 
-## 🤖 Phase 2: Building for Android (APK)
-
-### Prerequisites
-*   Download & Install [Android Studio](https://developer.android.com/studio).
-
-### Steps
-1.  **Sync your code:**
-    Every time you change your React code, run this before building:
-    ```bash
-    npm run sync
-    ```
-
-2.  **Open Project:**
-    ```bash
-    npm run open:android
-    ```
-
-3.  **Build APK:**
-    *   Wait for Android Studio to finish indexing (bottom right bar).
-    *   Go to **Build** menu > **Build Bundle(s) / APK(s)** > **Build APK(s)**.
-    *   *Wait for the build to finish.*
-
-4.  **Install:**
-    *   A notification will appear in the bottom right: *"APK(s) generated successfully"*.
-    *   Click **"locate"**.
-    *   Transfer the `.apk` file to your phone (via USB, WhatsApp, Drive, etc.) and install it.
-
----
-
-## 🍎 Phase 3: Building for iOS (iPhone/iPad)
-
-### Prerequisites
-*   You must be on a **Mac**.
-*   Download & Install [Xcode](https://developer.apple.com/xcode/) from the App Store.
-*   You need an Apple ID.
-
-### Steps
-1.  **Sync your code:**
-    ```bash
-    npm run sync
-    ```
-
-2.  **Open Project:**
+## 3. Build for iOS (Mac Only)
+1.  Run command:
     ```bash
     npm run open:ios
     ```
+2.  **Inside Xcode:**
+    *   Select your "Team" in the **Signing & Capabilities** tab.
+    *   Press the **Play** (▶️) button to run on your connected iPhone.
 
-3.  **Setup Signing (One time):**
-    *   In Xcode, click **"App"** in the left sidebar (the blue icon at the top).
-    *   Click the **"Signing & Capabilities"** tab in the main view.
-    *   Under **"Team"**, select your Apple ID (Add Account if needed).
-    *   Ensure **"Bundle Identifier"** is unique (e.g., `com.yourname.digigold`).
+## 4. Updating Your App
+After you make changes to your code (e.g., editing `Dashboard.tsx`), you don't need to regenerate folders. Just run:
 
-4.  **Run on Device:**
-    *   Connect your iPhone to your Mac via USB.
-    *   In the top bar, select your iPhone from the device list.
-    *   Click the **Play (▶️)** button.
+```bash
+npm run mobile:update
+```
 
----
-
-## 🛠 Troubleshooting
-
-**1. "Android folder already exists" Error**
-If you run `mobile:init` twice, it might fail. If you need to regenerate folders entirely:
-1.  Delete the `android` or `ios` folder manually.
-2.  Run `npm run mobile:init` again.
-
-**2. Styles look broken on the phone?**
-This app uses TailwindCSS via CDN for the preview. For production mobile apps, **ensure your phone has internet access** or configure Tailwind to compile locally (already set up in this project via `postcss`).
-
-**3. "SDK Location not found"**
-Open Android Studio, go to **Settings > Languages & Frameworks > Android SDK**, and copy the Android SDK Location path to your `local.properties` file if prompted.
+This will:
+1.  Rebuild your React code.
+2.  Sync the changes to the `android` and `ios` folders.
+3.  You can then press "Run" in Android Studio/Xcode again.

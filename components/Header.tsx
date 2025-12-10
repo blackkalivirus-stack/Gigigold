@@ -22,7 +22,7 @@ export const Header: React.FC<HeaderProps> = ({ title, showBack = false, onBack,
   };
 
   return (
-    <header className={`sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-slate-50/80 backdrop-blur-xl border-b border-white/50 transition-all duration-300 ${className}`}>
+    <header className={`sticky top-0 z-30 flex items-center justify-between px-6 py-4 pt-safe bg-slate-50/80 backdrop-blur-xl border-b border-white/50 transition-all duration-300 ${className}`}>
       <div className="flex items-center gap-4">
         {showBack && (
           <button 

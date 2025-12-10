@@ -1,21 +1,29 @@
-# How to Generate the APK
+# How to Generate Mobile Apps (APK & iOS)
 
 ## Prerequisites
 1.  **Node.js** installed.
-2.  **Android Studio** installed (Required to compile the final APK).
+2.  **Android Studio** installed (for Android APKs).
+3.  **Xcode** installed (for iOS Apps - Mac only).
 
-## Using VS Code Tasks (Recommended)
-We have added automated tasks to VS Code.
+## Method 1: Using VS Code Tasks (Recommended)
+We have added automated tasks to VS Code to make this easy.
 
 1.  Open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`).
 2.  Type **"Run Task"** and press Enter.
-3.  Select **"1. Initialize Android Platform"**.
-    *   *Do this only the first time. It creates the missing `android` folder.*
-4.  Select **"2. Sync & Open Android Studio"**.
-    *   *Do this every time you change your code.*
+3.  Select **"1. Initialize Mobile Platforms (Android & iOS)"**.
+    *   *Do this only the first time. It creates the missing `android` and `ios` folders.*
+4.  Select **"2. Open Android Studio"** or **"3. Open Xcode"**.
+    *   *Do this every time you change your code to sync updates.*
 
-## Generating the APK File
-Once **Android Studio** opens via the command above:
+## Method 2: Using Terminal
+You can also run these commands directly in the VS Code terminal:
+
+*   **Initialize Folders:** `npm run mobile:init`
+*   **Open Android:** `npm run open:android`
+*   **Open iOS:** `npm run open:ios`
+
+## generating the APK File (Android Studio)
+Once **Android Studio** opens:
 
 1.  Wait for the project to index (look at the bottom right loading bars).
 2.  In the top menu bar, click **Build**.
@@ -30,4 +38,4 @@ Once **Android Studio** opens via the command above:
     *   Ensure the `dist` folder exists (run `npm run build`).
 
 *   **App looks different on phone?**
-    *   This app uses Tailwind via CDN for styling. Ensure your phone has an internet connection, or configure Tailwind locally for offline support.
+    *   This app uses Tailwind via CDN for styling. Ensure your phone has an internet connection.

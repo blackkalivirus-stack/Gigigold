@@ -2,23 +2,31 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "1. Initialize Android Platform",
-      "type": "shell",
-      "command": "npm install && npm run build && npx cap add android",
+      "label": "1. Initialize Mobile Platforms (Android & iOS)",
+      "type": "npm",
+      "script": "mobile:init",
       "problemMatcher": [],
       "group": "none",
-      "detail": "Run this ONCE to create the android folder."
+      "detail": "Generates both android and ios folders in one step."
     },
     {
-      "label": "2. Sync & Open Android Studio",
+      "label": "2. Open Android Studio (APK)",
       "type": "shell",
       "command": "npm run build && npx cap sync && npx cap open android",
       "problemMatcher": [],
       "group": "build",
-      "detail": "Builds your React code and opens Android Studio to generate the APK."
+      "detail": "Syncs changes and opens Android Studio to build APKs."
     },
     {
-      "label": "3. Start Web Server (Dev)",
+      "label": "3. Open Xcode (iOS)",
+      "type": "shell",
+      "command": "npm run build && npx cap sync && npx cap open ios",
+      "problemMatcher": [],
+      "group": "build",
+      "detail": "Syncs changes and opens Xcode to build the iOS App."
+    },
+    {
+      "label": "4. Start Web Server (Dev)",
       "type": "npm",
       "script": "dev",
       "problemMatcher": [],

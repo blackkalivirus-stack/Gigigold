@@ -1,41 +1,90 @@
-# How to Generate Mobile Apps (APK & iOS)
+# 📱 Mobile App Build Guide (Android & iOS)
 
-## Prerequisites
-1.  **Node.js** installed.
-2.  **Android Studio** installed (for Android APKs).
-3.  **Xcode** installed (for iOS Apps - Mac only).
+This project uses **Capacitor** to wrap the React web app into native mobile apps.
 
-## Method 1: Using VS Code Tasks (Recommended)
-We have added automated tasks to VS Code to make this easy.
+---
 
-1.  Open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`).
-2.  Type **"Run Task"** and press Enter.
-3.  Select **"1. Initialize Mobile Platforms (Android & iOS)"**.
-    *   *Do this only the first time. It creates the missing `android` and `ios` folders.*
-4.  Select **"2. Open Android Studio"** or **"3. Open Xcode"**.
-    *   *Do this every time you change your code to sync updates.*
+## 🚀 Phase 1: Initialization (First Time Only)
+Before you can build the app, you need to generate the native project folders.
 
-## Method 2: Using Terminal
-You can also run these commands directly in the VS Code terminal:
+1.  Open your terminal.
+2.  Run the initialization script:
+    ```bash
+    npm run mobile:init
+    ```
+    ✅ **Success:** You will see new `android` and `ios` folders appear in your file explorer.
 
-*   **Initialize Folders:** `npm run mobile:init`
-*   **Open Android:** `npm run open:android`
-*   **Open iOS:** `npm run open:ios`
+---
 
-## generating the APK File (Android Studio)
-Once **Android Studio** opens:
+## 🤖 Phase 2: Building for Android (APK)
 
-1.  Wait for the project to index (look at the bottom right loading bars).
-2.  In the top menu bar, click **Build**.
-3.  Select **Build Bundle(s) / APK(s)** > **Build APK(s)**.
-4.  When finished, a notification will appear in the bottom right corner.
-5.  Click the **"locate"** link in that notification to find your `.apk` file.
+### Prerequisites
+*   Download & Install [Android Studio](https://developer.android.com/studio).
 
-## Troubleshooting
+### Steps
+1.  **Sync your code:**
+    Every time you change your React code, run this before building:
+    ```bash
+    npm run sync
+    ```
 
-*   **"npx cap add android" fails?**
-    *   Make sure you have run `npm install` first.
-    *   Ensure the `dist` folder exists (run `npm run build`).
+2.  **Open Project:**
+    ```bash
+    npm run open:android
+    ```
 
-*   **App looks different on phone?**
-    *   This app uses Tailwind via CDN for styling. Ensure your phone has an internet connection.
+3.  **Build APK:**
+    *   Wait for Android Studio to finish indexing (bottom right bar).
+    *   Go to **Build** menu > **Build Bundle(s) / APK(s)** > **Build APK(s)**.
+    *   *Wait for the build to finish.*
+
+4.  **Install:**
+    *   A notification will appear in the bottom right: *"APK(s) generated successfully"*.
+    *   Click **"locate"**.
+    *   Transfer the `.apk` file to your phone (via USB, WhatsApp, Drive, etc.) and install it.
+
+---
+
+## 🍎 Phase 3: Building for iOS (iPhone/iPad)
+
+### Prerequisites
+*   You must be on a **Mac**.
+*   Download & Install [Xcode](https://developer.apple.com/xcode/) from the App Store.
+*   You need an Apple ID.
+
+### Steps
+1.  **Sync your code:**
+    ```bash
+    npm run sync
+    ```
+
+2.  **Open Project:**
+    ```bash
+    npm run open:ios
+    ```
+
+3.  **Setup Signing (One time):**
+    *   In Xcode, click **"App"** in the left sidebar (the blue icon at the top).
+    *   Click the **"Signing & Capabilities"** tab in the main view.
+    *   Under **"Team"**, select your Apple ID (Add Account if needed).
+    *   Ensure **"Bundle Identifier"** is unique (e.g., `com.yourname.digigold`).
+
+4.  **Run on Device:**
+    *   Connect your iPhone to your Mac via USB.
+    *   In the top bar, select your iPhone from the device list.
+    *   Click the **Play (▶️)** button.
+
+---
+
+## 🛠 Troubleshooting
+
+**1. "Android folder already exists" Error**
+If you run `mobile:init` twice, it might fail. If you need to regenerate folders entirely:
+1.  Delete the `android` or `ios` folder manually.
+2.  Run `npm run mobile:init` again.
+
+**2. Styles look broken on the phone?**
+This app uses TailwindCSS via CDN for the preview. For production mobile apps, **ensure your phone has internet access** or configure Tailwind to compile locally (already set up in this project via `postcss`).
+
+**3. "SDK Location not found"**
+Open Android Studio, go to **Settings > Languages & Frameworks > Android SDK**, and copy the Android SDK Location path to your `local.properties` file if prompted.
